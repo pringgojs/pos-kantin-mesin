@@ -3,6 +3,8 @@ package com.smartmachineindonesia.pos;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -11,7 +13,7 @@ import android.webkit.WebViewClient;
 public class MainActivity extends AppCompatActivity {
 
     private WebView view; //membuat variabel view agar bisa akses method
-    String url = "http://app.smartcanteenindonesia.com/";
+    String url = "http://app.smartcanteenindonesia.com";
     SwipeRefreshLayout swipe;
 
     @Override
@@ -39,11 +41,26 @@ public class MainActivity extends AppCompatActivity {
         view.setWebViewClient(new WebViewClient(){
             public void onReceivedError(WebView view, int errorCode,
                                         String description, String failingUrl) {
-                view.loadUrl("file:///android_asset/error.html");
+                view.loadUrl("http://app.smartcanteenindonesia.com/404");
             }
             public  void  onPageFinished(WebView view, String url){
                 //ketika loading selesai, ison loading akan hilang
                 swipe.setRefreshing(false);
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                Intent intent;
+
+                if (url.contains("gojek://")) {
+                    intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse(url));
+                    startActivity(intent);
+
+                    return true;
+                }
+
+                return false;
             }
         });
 
@@ -78,4 +95,6 @@ public class MainActivity extends AppCompatActivity {
             finish();
         }
     }
+
+
 }
