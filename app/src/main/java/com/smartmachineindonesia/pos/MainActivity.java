@@ -5,6 +5,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -13,7 +14,7 @@ import android.webkit.WebViewClient;
 public class MainActivity extends AppCompatActivity {
 
     private WebView view; //membuat variabel view agar bisa akses method
-    String url = "http://app.smartcanteenindonesia.com";
+    String url = "https://app.smartcanteenindonesia.com";
     SwipeRefreshLayout swipe;
 
     @Override
