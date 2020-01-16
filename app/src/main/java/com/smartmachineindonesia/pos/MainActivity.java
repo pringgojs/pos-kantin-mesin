@@ -1,5 +1,6 @@
 package com.smartmachineindonesia.pos;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -7,9 +8,13 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -17,11 +22,25 @@ public class MainActivity extends AppCompatActivity {
     String url = "https://app.smartcanteenindonesia.com";
     SwipeRefreshLayout swipe;
 
+    Button btnBayar;
+    Bundle extras;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        extras = getIntent().getExtras();
+
+
+        if (getIntent().hasExtra("url")) {
+            url = extras.getString("url");
+            String base_url = "https://app.smartcanteenindonesia.com/api/v1/mobile/scan-qr-code?id="+url;
+            Log.v("TAG URL", base_url); // Prints scan results
+
+        }
+
+        btnBayar = findViewById(R.id.btnBayar);
         swipe = (SwipeRefreshLayout) findViewById(R.id.swipe);
         swipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -30,8 +49,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        btnBayar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, ScanQRCodeActivity.class);
+                startActivity(intent);
+            }
+        });
         LoadWeb();
     }
+
+
 
     private void LoadWeb() {
         view = (WebView) this.findViewById(R.id.web_view);
@@ -96,6 +124,5 @@ public class MainActivity extends AppCompatActivity {
             finish();
         }
     }
-
 
 }
