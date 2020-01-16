@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (getIntent().hasExtra("url")) {
             url = extras.getString("url");
-            String base_url = "https://app.smartcanteenindonesia.com/api/v1/mobile/scan-qr-code?id="+url;
+            String base_url = "https://app.smartcanteenindonesia.com/public/api/v1/mobile/scan-qr-code?id="+url;
             Log.v("TAG URL", base_url); // Prints scan results
 
         }

@@ -1,19 +1,29 @@
 package com.smartmachineindonesia.pos;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
 import com.google.zxing.Result;
 
-import me.dm7.barcodescanner.zxing.ZXingScannerView;
+import java.util.List;
 
-public class ScanQRCodeActivity extends AppCompatActivity  implements ZXingScannerView.ResultHandler {
+import me.dm7.barcodescanner.zxing.ZXingScannerView;
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.AppSettingsDialog;
+import pub.devrel.easypermissions.EasyPermissions;
+import pub.devrel.easypermissions.PermissionRequest;
+
+public class ScanQRCodeActivity extends AppCompatActivity  implements ZXingScannerView.ResultHandler, EasyPermissions.PermissionCallbacks {
 
     private ZXingScannerView mScannerView;
 
@@ -22,8 +32,32 @@ public class ScanQRCodeActivity extends AppCompatActivity  implements ZXingScann
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan_qrcode);
 
-        mScannerView = new ZXingScannerView(this);
-        setContentView(mScannerView);
+
+//        mScannerView = new ZXingScannerView(this);
+//        setContentView(mScannerView);
+        methodRequiresTwoPermission();
+
+    }
+
+    @AfterPermissionGranted(1)
+    private void methodRequiresTwoPermission() {
+        String[] perms = {Manifest.permission.CAMERA};
+        if (EasyPermissions.hasPermissions(this, perms)) {
+            mScannerView = new ZXingScannerView(this);
+            setContentView(mScannerView);
+        } else {
+            // Do not have permissions, request them now
+            EasyPermissions.requestPermissions(this, "misi",
+                    1, perms);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Forward results to EasyPermissions
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 
     @Override
@@ -56,15 +90,43 @@ public class ScanQRCodeActivity extends AppCompatActivity  implements ZXingScann
     @Override
     public void onResume() {
         super.onResume();
-        mScannerView.setResultHandler(this); // Register ourselves as a handler for scan results.
-        mScannerView.startCamera();          // Start camera on resume
+        if(mScannerView!=null) {
+            mScannerView.setResultHandler(this); // Register ourselves as a handler for scan results.
+            mScannerView.startCamera();          // Start camera on resume
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mScannerView.stopCamera();           // Stop camera on pause
+        if(mScannerView!=null) {
+            mScannerView.stopCamera();
+        } // Stop camera on pause
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(mScannerView!=null) {
+            mScannerView.stopCamera();
+        }
     }
 
 
+    @Override
+    public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
+        mScannerView = new ZXingScannerView(this);
+        setContentView(mScannerView);
+    }
+
+    @Override
+    public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
+        Log.d("TAG", "onPermissionsDenied:" + requestCode + ":" + perms.size());
+
+        // (Optional) Check whether the user denied any permissions and checked "NEVER ASK AGAIN."
+        // This will display a dialog directing them to enable the permission in app settings.
+        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
+            new AppSettingsDialog.Builder(this).build().show();
+        }
+    }
 }
